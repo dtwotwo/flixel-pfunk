@@ -122,11 +122,6 @@ class FlxCamera extends FlxBasic {
 	public var followLerp = 1.;
 
 	/**
-	 * Whenever target following is enabled. Defaults to `true`.
-	 */
-	public var followEnabled = true;
-
-	/**
 	 * You can assign a "dead zone" to the camera in order to better control its movement.
 	 * The camera will always keep the focus object inside the dead zone, unless it is bumping up against
 	 * the camera bounds. The `deadzone`'s coordinates are measured from the camera's upper left corner in game pixels.
@@ -217,6 +212,15 @@ class FlxCamera extends FlxBasic {
 	 * @since 5.4.0
 	 */
 	public var pixelPerfectShake:Null<Bool> = null;
+
+	/**
+	 * The rotation offset for the camera.
+	 * 
+	 * This is used to rotate the camera around its center point.
+	 * 
+	 * The default value is (0.5, 0.5) which means the camera will rotate around its center point.
+	 */
+	public var rotationOffset(default, set) = new FlxPoint(.5, .5);
 
 	/**
 	 * How wide the camera display is, in game pixels.
@@ -580,9 +584,6 @@ class FlxCamera extends FlxBasic {
 	static var renderPoint = FlxPoint.get();
 	static var renderRect = FlxRect.get();
 
-	@:noCompletion var _sinAngle = .0;
-	@:noCompletion var _cosAngle = 1.;
-
 	public function alterScreenPosition(spr:FlxObject, pos:FlxPoint):FlxPoint return pos;
 
 	@:noCompletion public function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets = false, ?blend:BlendMode, smooth = false, ?shader:FlxShader) {
@@ -728,11 +729,9 @@ class FlxCamera extends FlxBasic {
 			_helperMatrix.copyFrom(matrix);
 			if (_useBlitMatrix) {
 				_helperMatrix.concat(_blitMatrix);
-				rotateMatrix(_helperMatrix);
 				buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || antialiasing));
 			} else {
 				_helperMatrix.translate(-viewMarginLeft, -viewMarginTop);
-				rotateMatrix(_helperMatrix);
 				buffer.draw(pixels, _helperMatrix, null, blend, null, (smoothing || antialiasing));
 			}
 		} else {
@@ -755,7 +754,6 @@ class FlxCamera extends FlxBasic {
 					_helperMatrix.identity();
 					_helperMatrix.translate(destPoint.x, destPoint.y);
 					_helperMatrix.concat(_blitMatrix);
-					rotateMatrix(_helperMatrix);
 					buffer.draw(pixels, _helperMatrix, null, null, null, (smoothing || antialiasing));
 				} else {
 					_helperPoint.x = destPoint.x - Std.int(viewMarginLeft);
@@ -778,7 +776,6 @@ class FlxCamera extends FlxBasic {
 			#else
 			final drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend);
 			#end
-			rotateMatrix(_helperMatrix);
 			drawItem.addQuad(frame, _helperMatrix, transform);
 		}
 	}
@@ -828,7 +825,6 @@ class FlxCamera extends FlxBasic {
 					}
 				}
 
-				rotateMatrix(_helperMatrix);
 				buffer.draw(trianglesSprite, _helperMatrix);
 				#if FLX_DEBUG
 				if (FlxG.debugger.drawDebug) {
@@ -855,15 +851,6 @@ class FlxCamera extends FlxBasic {
 			drawItem.addTriangles(vertices, indices, uvtData, colors, position, _bounds);
 			#end
 		}
-	}
-
-	inline function rotateMatrix(matrix:FlxMatrix) {
-		if (angle % 360 == 0) return;
-		final midpointX = width * .5;
-		final midpointY = height * .5;
-		matrix.translate(-midpointX, -midpointY);
-		matrix.rotateWithTrig(_cosAngle, _sinAngle);
-		matrix.translate(midpointX, midpointY);
 	}
 
 	/**
@@ -1039,11 +1026,15 @@ class FlxCamera extends FlxBasic {
 	 */
 	override public function update(elapsed:Float):Void {
 		// follow the target, if there is one
-		if (target != null && followEnabled && !paused) updateFollow();
+		if (target != null && !paused) {
+			updateFollow();
+			updateLerp(elapsed);
+		}
 		updateScroll();
 		if (!paused) {
 			updateFlash(elapsed);
 			updateFade(elapsed);
+			angleFixUpdate();
 		}
 		flashSprite.filters = filtersEnabled ? filters : null;
 
@@ -1088,7 +1079,7 @@ class FlxCamera extends FlxBasic {
 	 * Updates camera's scroll.
 	 * Called every frame by camera's `update()` method (if camera's `target` isn't `null`).
 	 */
-	public function updateFollow(?elapsed = .0):Void {
+	function updateFollow():Void {
 		// Either follow the object closely,
 		// or double check our deadzone and update accordingly.
 		if (deadzone == null) {
@@ -1130,10 +1121,13 @@ class FlxCamera extends FlxBasic {
 			}
 		}
 
-		if (followLerp >= 1) scroll.copyFrom(_scrollTarget);
+	}
+
+	function updateLerp(elapsed:Float) {
+		if (followLerp >= 1) scroll.copyFrom(_scrollTarget); // no easing
 		else if (followLerp > 0) {
 			// Adjust lerp based on the current frame rate so lerp is less framerate dependant
-			final adjustedLerp = 1. - Math.pow(1. - followLerp, elapsed * 60);
+			final adjustedLerp = 1 - Math.pow(1 - followLerp, elapsed * 60);
 			scroll.x += (_scrollTarget.x - scroll.x) * adjustedLerp;
 			scroll.y += (_scrollTarget.y - scroll.y) * adjustedLerp;
 		}
@@ -1234,8 +1228,8 @@ class FlxCamera extends FlxBasic {
 
 			_scrollRect.scrollRect = rect;
 
-			_scrollRect.x = -0.5 * rect.width;
-			_scrollRect.y = -0.5 * rect.height;
+			_scrollRect.x = -.5 * rect.width;
+			_scrollRect.y = -.5 * rect.height;
 		}
 	}
 
@@ -1632,8 +1626,7 @@ class FlxCamera extends FlxBasic {
 	 * @since 4.3.0
 	 */
 	public inline function containsPoint(point:FlxPoint, width = .0, height = .0):Bool {
-		final cameraView = getRotatedBounds(getViewMarginRect(_bounds));
-		final contained = (point.x + width > cameraView.left) && (point.x < cameraView.right) && (point.y + height > cameraView.top) && (point.y < cameraView.bottom);
+		final contained = (point.x + width > viewMarginLeft) && (point.x < viewMarginRight) && (point.y + height > viewMarginTop) && (point.y < viewMarginBottom);
 		point.putWeak();
 		return contained;
 	}
@@ -1643,45 +1636,31 @@ class FlxCamera extends FlxBasic {
 	 * @since 4.11.0
 	 */
 	public inline function containsRect(rect:FlxRect):Bool {
-		final cameraView = getRotatedBounds(getViewMarginRect(_bounds));
-		return cameraView.overlaps(rect);
+		final contained = (rect.right > viewMarginLeft) && (rect.x < viewMarginRight) && (rect.bottom > viewMarginTop) && (rect.y < viewMarginBottom);
+		rect.putWeak();
+		return contained;
 	}
 
-	/**
-	 * Helper function to get rotated boundaries for this camera (if camera is rotated).
-	 */
-	inline function getRotatedBounds(rect:FlxRect):FlxRect {
-		var degrees = angle % 360;
-		if (degrees != 0) {
-			if (degrees < 0) degrees += 360;
-				
-			final originX = rect.width * .5;
-			final originY = rect.height * .5;
-			
-			final left = -originX;
-			final top = -originY;
-			final right = -originX + rect.width;
-			final bottom = -originY + rect.height;
-			
-			if (degrees < 90) {
-				rect.x += originX + _cosAngle * left - _sinAngle * bottom;
-				rect.y += originY + _sinAngle * left + _cosAngle * top;
-			} else if (degrees < 180) {
-				rect.x += originX + _cosAngle * right - _sinAngle * bottom;
-				rect.y += originY + _sinAngle * left + _cosAngle * bottom;
-			} else if (degrees < 270) {
-				rect.x += originX + _cosAngle * right - _sinAngle * top;
-				rect.y += originY + _sinAngle * right + _cosAngle * bottom;
-			} else {
-				rect.x += originX + _cosAngle * left - _sinAngle * top;
-				rect.y += originY + _sinAngle * right + _cosAngle * top;
-			}
-			
-			final newHeight = Math.abs(_cosAngle * rect.height) + Math.abs(_sinAngle * rect.width);
-			rect.width = Math.abs(_cosAngle * rect.width) + Math.abs(_sinAngle * rect.height);
-			rect.height = newHeight;
-		}
-		return rect;
+	public inline function angleFixUpdate() {
+		flashSprite.x -= _flashOffset.x;
+		flashSprite.y -= _flashOffset.y;
+		final matrix = new openfl.geom.Matrix();
+		matrix.translate(-width * rotationOffset.x, -height * rotationOffset.y);
+		matrix.scale(scaleX, scaleY);
+		matrix.rotate(angle * (Math.PI / 180));
+		matrix.translate(width * rotationOffset.x, height * rotationOffset.y);
+		matrix.translate(flashSprite.x, flashSprite.y);
+		matrix.scale(FlxG.scaleMode.scale.x, FlxG.scaleMode.scale.y);
+		canvas.transform.matrix = matrix;
+		flashSprite.x = width * .5 * FlxG.scaleMode.scale.x;
+		flashSprite.y = height * .5 * FlxG.scaleMode.scale.y;
+		flashSprite.rotation = 0;
+	}
+
+	@:noCompletion inline function set_rotationOffset(newValue:FlxPoint):FlxPoint {
+		rotationOffset = newValue;
+		angleFixUpdate();
+		return newValue;
 	}
 
 	@:noCompletion function set_width(value:Int):Int {
@@ -1722,13 +1701,8 @@ class FlxCamera extends FlxBasic {
 	}
 
 	@:noCompletion function set_angle(angle:Float):Float {
-		if (this.angle != angle)
-		{
-			final radians = angle * FlxAngle.TO_RAD;
-			_sinAngle = Math.sin(radians);
-			_cosAngle = Math.cos(radians);
-		}
 		this.angle = angle;
+		flashSprite.rotation = angle;
 		return angle;
 	}
 
@@ -1782,7 +1756,6 @@ class FlxCamera extends FlxBasic {
 		viewMarginY = .5 * height * (scaleY - initialZoom) / scaleY;
 	}
 	
-	@:noCompletion inline function set_followLerp(value:Float) return followLerp = value;
 	@:noCompletion static inline function get_defaultCameras():Array<FlxCamera> return _defaultCameras;
 	@:noCompletion static inline function set_defaultCameras(value:Array<FlxCamera>):Array<FlxCamera> return _defaultCameras = value;
 	@:noCompletion inline function get_viewMarginLeft():Float return viewMarginX;
