@@ -254,7 +254,8 @@ class FlxGame extends Sprite
 	 *                         [`scaleMode`](https://api.haxeflixel.com/flixel/system/scaleModes/index.html)
 	 *                         will determine the actual display size of the game.
 	 * @param initialState     A constructor for the initial state, ex: `PlayState.new` or `()->new PlayState()`.
-	 *                         Note: Also allows `Class<FlxState>` for backwards compatibility.
+	 *                         Note: Before Flixel 6, this took a `Class<FlxState>`, this has been
+	 *                         deprecated, but is still available, for backwards compatibility.
 	 * @param updateFramerate  How frequently the game should update. Default is 60 fps.
 	 * @param drawFramerate    Sets the actual display / draw framerate for the game. Default is 60 fps.
 	 * @param skipSplash       Whether you want to skip the flixel splash screen with `FLX_NO_DEBUG`.
@@ -358,9 +359,6 @@ class FlxGame extends Sprite
 		#if (desktop && openfl <= "4.0.0")
 		stage.addEventListener(FocusEvent.FOCUS_OUT, onFocusLost);
 		stage.addEventListener(FocusEvent.FOCUS_IN, onFocus);
-		#elseif (sys && openfl >= "9.3.0")
-		stage.nativeWindow.addEventListener(Event.DEACTIVATE, onFocusLost);
-		stage.nativeWindow.addEventListener(Event.ACTIVATE, onFocus);
 		#else
 		stage.addEventListener(Event.DEACTIVATE, onFocusLost);
 		stage.addEventListener(Event.ACTIVATE, onFocus);
@@ -632,7 +630,7 @@ class FlxGame extends Sprite
 
 		// Finally assign and create the new state
 		_state = _nextState.createInstance();
-		_state._constructor = _nextState;
+		_state._constructor = _nextState.getConstructor();
 		_nextState = null;
 
 		if (_gameJustStarted)
@@ -651,8 +649,8 @@ class FlxGame extends Sprite
 
 		FlxG.signals.postStateSwitch.dispatch();
 	}
-
-	function gameStart():Void
+	
+	function gameStart()
 	{
 		FlxG.signals.postGameStart.dispatch();
 		_gameJustStarted = false;
