@@ -1,5 +1,6 @@
 package flixel.input.mouse;
 
+import lime.app.Application;
 #if FLX_MOUSE
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
@@ -468,6 +469,9 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		#end
 	}
 
+	var widthScreen = Application.current.window.display.bounds.width / Application.current.window.width;
+	var heightScreen = Application.current.window.display.bounds.height / Application.current.window.height;
+
 	/**
 	 * @param   cursorContainer   The cursor container sprite passed by FlxGame
 	 */
@@ -501,14 +505,18 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 
 		FlxG.signals.postGameStart.add(onGameStart);
 		Mouse.hide();
+
+		FlxG.signals.gameResized.add((w, h) -> {
+			cursorContainer.scaleX = 1 / widthScreen;
+			cursorContainer.scaleY = 1 / heightScreen;
+		});
 	}
 
 	/**
 	 * Called by the internal game loop to update the mouse pointer's position in the game world.
 	 * Also updates the just pressed/just released flags.
 	 */
-	function update():Void
-	{
+	function update():Void {
 		_prevX = x;
 		_prevY = y;
 		_prevViewX = viewX;
@@ -520,10 +528,20 @@ class FlxMouse extends FlxPointer implements IFlxInputManager
 		setRawPositionUnsafe(FlxG.game.mouseX, FlxG.game.mouseY);
 
 		// actually position the flixel mouse cursor graphic
-		if (visible)
-		{
+		if (visible) {
 			cursorContainer.x = FlxG.game.mouseX;
 			cursorContainer.y = FlxG.game.mouseY;
+
+			widthScreen = Application.current.window.display.bounds.width / Application.current.window.width;
+			heightScreen = Application.current.window.display.bounds.height / Application.current.window.height;
+			
+			if (FlxG.fullscreen) cursorContainer.scaleX = cursorContainer.scaleY = 1;
+			else {
+				if (widthScreen == heightScreen) {
+					cursorContainer.scaleX = 1 / widthScreen;
+					cursorContainer.scaleY = 1 / heightScreen;
+				}
+			}
 		}
 		#end
 

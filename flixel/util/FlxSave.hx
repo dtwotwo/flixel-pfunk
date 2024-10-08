@@ -399,6 +399,13 @@ private class FlxSharedObject extends SharedObject
 				app.onExit.add(onExit);
 		}
 	}
+
+	/**
+	 * Returns the path to the root directory of the project, with an optional suffix.
+	 * @param arg The suffix to add to the path.
+	 */
+	static function startPath(name = '', localPath = '')
+		return haxe.io.Path.normalize('${lime.system.System.documentsDirectory}/${localPath}/${FlxG.stage.application.meta.get('file')}/$name');
 	
 	static function onExit(_)
 	{
@@ -538,42 +545,25 @@ private class FlxSharedObject extends SharedObject
 		return null;
 	}
 	
-	static function getPath(localPath:String, name:String):String
-	{
-		// Avoid ever putting .sol files directly in AppData
-		if (localPath == "")
-			localPath = getDefaultLocalPath();
-		
-		var directory = lime.system.System.applicationStorageDirectory;
-		var path = haxe.io.Path.normalize('$directory/../../../$localPath') + "/";
+	static function getPath(localPath:String, name:String):String {
+		// Avoid ever putting .save files directly in Documents
+		if (localPath == "") localPath = getDefaultLocalPath();
 		
 		name = StringTools.replace(name, "//", "/");
 		name = StringTools.replace(name, "//", "/");
 		
-		if (StringTools.startsWith(name, "/"))
-		{
-			name = name.substr(1);
-		}
+		if (StringTools.startsWith(name, "/")) name = name.substr(1);
+		if (StringTools.endsWith(name, "/")) name = name.substring(0, name.length - 1);
 		
-		if (StringTools.endsWith(name, "/"))
-		{
-			name = name.substring(0, name.length - 1);
-		}
-		
-		if (name.indexOf("/") > -1)
-		{
-			var split = name.split("/");
+		if (name.indexOf("/") > -1) {
+			final split = name.split("/");
 			name = "";
-			
-			for (i in 0...(split.length - 1))
-			{
-				name += "#" + split[i] + "/";
-			}
-			
+			for (i in 0...(split.length - 1)) name += "#" + split[i] + "/";
 			name += split[split.length - 1];
 		}
-		
-		return path + name + ".sol";
+
+		FlxG.log.add('Saved to ${startPath('saves/$name.save', localPath)}');
+		return startPath('saves/$name.save', localPath);
 	}
 	
 	/**
