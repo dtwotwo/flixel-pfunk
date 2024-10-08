@@ -404,8 +404,8 @@ private class FlxSharedObject extends SharedObject
 	 * Returns the path to the root directory of the project, with an optional suffix.
 	 * @param arg The suffix to add to the path.
 	 */
-	static function startPath(name = '', localPath = '')
-		return haxe.io.Path.normalize('${lime.system.System.documentsDirectory}/${localPath}/${FlxG.stage.application.meta.get('file')}/$name');
+	static function startPath(name = '')
+		return haxe.io.Path.normalize('${lime.system.System.documentsDirectory}/${getDefaultLocalPath()}/${openfl.Lib.current.stage.application.meta['file']}/$name');
 	
 	static function onExit(_)
 	{
@@ -562,8 +562,8 @@ private class FlxSharedObject extends SharedObject
 			name += split[split.length - 1];
 		}
 
-		FlxG.log.add('Saved to ${startPath('saves/$name.save', localPath)}');
-		return startPath('saves/$name.save', localPath);
+		FlxG.log.notice('Saved to ${startPath('saves/$name.save')}');
+		return startPath('saves/$name.save');
 	}
 	
 	/**
