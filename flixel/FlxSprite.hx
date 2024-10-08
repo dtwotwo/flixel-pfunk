@@ -1,5 +1,6 @@
 package flixel;
 
+import flixel.FlxTypes;
 import flixel.FlxBasic.IFlxBasic;
 import flixel.animation.FlxAnimationController;
 import flixel.graphics.FlxGraphic;
@@ -287,79 +288,64 @@ class FlxSprite extends FlxObject
 	/**
 	 * The actual frame used for sprite rendering
 	 */
-	@:noCompletion
-	var _frame:FlxFrame;
+	@:noCompletion var _frame:FlxFrame;
 
 	/**
 	 * Graphic of `_frame`. Used in tile render mode, when `useFramePixels` is `true`.
 	 */
-	@:noCompletion
-	var _frameGraphic:FlxGraphic;
+	@:noCompletion var _frameGraphic:FlxGraphic;
 
-	@:noCompletion
-	var _facingHorizontalMult:Int = 1;
-	@:noCompletion
-	var _facingVerticalMult:Int = 1;
+	@:noCompletion var _facingHorizontalMult:ByteInt = 1;
+	@:noCompletion var _facingVerticalMult:ByteInt = 1;
 
 	/**
 	 * Internal, reused frequently during drawing and animating.
 	 */
-	@:noCompletion
-	var _flashPoint:Point;
+	@:noCompletion var _flashPoint:Point;
 
 	/**
 	 * Internal, reused frequently during drawing and animating.
 	 */
-	@:noCompletion
-	var _flashRect:Rectangle;
+	@:noCompletion var _flashRect:Rectangle;
 
 	/**
 	 * Internal, reused frequently during drawing and animating.
 	 */
-	@:noCompletion
-	var _flashRect2:Rectangle;
+	@:noCompletion var _flashRect2:Rectangle;
 
 	/**
 	 * Internal, reused frequently during drawing and animating. Always contains `(0,0)`.
 	 */
-	@:noCompletion
-	var _flashPointZero:Point;
+	@:noCompletion var _flashPointZero:Point;
 
 	/**
 	 * Internal, helps with animation, caching and drawing.
 	 */
-	@:noCompletion
-	var _matrix:FlxMatrix;
+	@:noCompletion var _matrix:FlxMatrix;
 
 	/**
 	 * Rendering helper variable
 	 */
-	@:noCompletion
-	var _halfSize:FlxPoint;
+	@:noCompletion var _halfSize:FlxPoint;
 	
 	/**
 	 *  Helper variable
 	 */
-	@:noCompletion
-	var _scaledOrigin:FlxPoint;
+	@:noCompletion var _scaledOrigin:FlxPoint;
 
 	/**
 	 * These vars are being used for rendering in some of `FlxSprite` subclasses (`FlxTileblock`, `FlxBar`,
 	 * and `FlxBitmapText`) and for checks if the sprite is in camera's view.
 	 */
-	@:noCompletion
-	var _sinAngle:Float = 0;
+	@:noCompletion var _sinAngle:Float = 0;
 
-	@:noCompletion
-	var _cosAngle:Float = 1;
-	@:noCompletion
-	var _angleChanged:Bool = true;
+	@:noCompletion var _cosAngle:Float = 1;
+	@:noCompletion var _angleChanged:Bool = true;
 
 	/**
 	 * Maps `FlxDirectionFlags` values to axis flips
 	 */
-	@:noCompletion
-	var _facingFlip:Map<FlxDirectionFlags, {x:Bool, y:Bool}> = new Map<FlxDirectionFlags, {x:Bool, y:Bool}>();
+	@:noCompletion var _facingFlip:Map<FlxDirectionFlags, {x:Bool, y:Bool}> = new Map<FlxDirectionFlags, {x:Bool, y:Bool}>();
 
 	/**
 	 * Creates a `FlxSprite` at a specified position with a specified one-frame graphic.
@@ -434,6 +420,7 @@ class FlxSprite extends FlxObject
 		frames = null;
 		graphic = null;
 		_frame = FlxDestroyUtil.destroy(_frame);
+		isFrameNull = true;
 		_frameGraphic = FlxDestroyUtil.destroy(_frameGraphic);
 
 		shader = null;
@@ -796,12 +783,15 @@ class FlxSprite extends FlxObject
 		}
 	}
 
+	var isFrameNull(default, null) = true;
+
 	/**
 	 * Called by game loop, updates then blits or renders current frame of animation to the screen.
 	 */
 	override public function draw():Void
 	{
-		checkEmptyFrame();
+		if (isFrameNull)
+			checkEmptyFrame();
 
 		if (alpha == 0 || _frame.type == FlxFrameType.EMPTY)
 			return;
@@ -1167,7 +1157,8 @@ class FlxSprite extends FlxObject
 	@:noCompletion
 	function calcFrame(force = false):Void
 	{
-		checkEmptyFrame();
+		if (isFrameNull)
+			checkEmptyFrame();
 
 		if (FlxG.renderTile && !force)
 			return;
@@ -1214,6 +1205,7 @@ class FlxSprite extends FlxObject
 			_frameGraphic = FlxDestroyUtil.destroy(_frameGraphic);
 			_frameGraphic = FlxGraphic.fromBitmapData(framePixels, false, null, false);
 			_frame = _frameGraphic.imageFrame.frame.copyTo(_frame);
+			isFrameNull = false;
 		}
 
 		dirty = false;
@@ -1464,6 +1456,7 @@ class FlxSprite extends FlxObject
 		{
 			_frame = frame.copyTo(_frame);
 		}
+		isFrameNull = false;
 
 		return frame;
 	}

@@ -1,5 +1,6 @@
 package flixel.graphics.tile;
 
+import flixel.FlxTypes;
 import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
@@ -32,7 +33,7 @@ class FlxDrawBaseItem<T>
 	public var blending:Int = 0;
 	public var blend:BlendMode;
 
-	public var type:FlxDrawItemType;
+	public var type:FlxDrawItemType = NONE;
 
 	public var numVertices(get, never):Int;
 
@@ -52,7 +53,7 @@ class FlxDrawBaseItem<T>
 	{
 		graphics = null;
 		next = null;
-		type = null;
+		type = NONE;
 		nextTyped = null;
 	}
 
@@ -74,8 +75,9 @@ class FlxDrawBaseItem<T>
 	}
 }
 
-enum FlxDrawItemType
+enum abstract FlxDrawItemType(ByteUInt)
 {
-	TILES;
-	TRIANGLES;
+	var NONE;
+	var TILES;
+	var TRIANGLES;
 }

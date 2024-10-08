@@ -10,7 +10,7 @@
 		"tests/unit/bin/**/*.hx": true
 	},
 	"[haxe]": {
-		"editor.formatOnSave": true,
+		"editor.formatOnSave": false,
 		"editor.formatOnSaveMode": "modifications"
 	},
 	"haxe.configurations": [
