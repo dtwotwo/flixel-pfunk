@@ -1679,7 +1679,7 @@ class FlxCamera extends FlxBasic {
 		return rect;
 	}
 
-	@:noCompletion inline function set_width(value:Int):Int {
+	@:noCompletion function set_width(value:Int):Int {
 		if (width != value && value > 0) {
 			width = value;
 			calcMarginX();
@@ -1691,7 +1691,7 @@ class FlxCamera extends FlxBasic {
 		return value;
 	}
 
-	@:noCompletion inline function set_height(value:Int):Int {
+	@:noCompletion function set_height(value:Int):Int {
 		if (height != value && value > 0) {
 			height = value;
 			calcMarginY();
@@ -1703,20 +1703,20 @@ class FlxCamera extends FlxBasic {
 		return value;
 	}
 
-	@:noCompletion inline function set_zoom(zoom:Float):Float {
+	@:noCompletion function set_zoom(zoom:Float):Float {
 		this.zoom = (zoom == 0) ? defaultZoom : zoom;
 		setScale(this.zoom, this.zoom);
 		return this.zoom;
 	}
 
-	@:noCompletion inline function set_alpha(alpha:Float):Float {
+	@:noCompletion function set_alpha(alpha:Float):Float {
 		this.alpha = FlxMath.bound(alpha, 0, 1);
 		if (FlxG.renderBlit) _flashBitmap.alpha = alpha;
 		else canvas.alpha = alpha;
 		return alpha;
 	}
 
-	@:noCompletion inline function set_angle(angle:Float):Float {
+	@:noCompletion function set_angle(angle:Float):Float {
 		if (this.angle != angle)
 		{
 			final radians = angle * FlxAngle.TO_RAD;
@@ -1746,19 +1746,19 @@ class FlxCamera extends FlxBasic {
 		return color;
 	}
 
-	@:noCompletion inline function set_antialiasing(Antialiasing:Bool):Bool {
+	@:noCompletion function set_antialiasing(Antialiasing:Bool):Bool {
 		antialiasing = Antialiasing;
 		if (FlxG.renderBlit) _flashBitmap.smoothing = Antialiasing;
 		return Antialiasing;
 	}
 
-	@:noCompletion inline function set_x(x:Float):Float {
+	@:noCompletion function set_x(x:Float):Float {
 		this.x = x;
 		updateFlashSpritePosition();
 		return x;
 	}
 
-	@:noCompletion inline function set_y(y:Float):Float {
+	@:noCompletion function set_y(y:Float):Float {
 		this.y = y;
 		updateFlashSpritePosition();
 		return y;
