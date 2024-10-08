@@ -1129,9 +1129,14 @@ class FlxCamera extends FlxBasic {
 				_lastTargetPosition.y = target.y;
 			}
 		}
-		final adjustedLerp = 1 - Math.exp(-elapsed * followLerp / (1 / 60));
-		scroll.x += (_scrollTarget.x - scroll.x) * adjustedLerp;
-		scroll.y += (_scrollTarget.y - scroll.y) * adjustedLerp;
+
+		if (followLerp >= 1) scroll.copyFrom(_scrollTarget);
+		else if (followLerp > 0) {
+			// Adjust lerp based on the current frame rate so lerp is less framerate dependant
+			final adjustedLerp = 1. - Math.pow(1. - followLerp, elapsed * 60);
+			scroll.x += (_scrollTarget.x - scroll.x) * adjustedLerp;
+			scroll.y += (_scrollTarget.y - scroll.y) * adjustedLerp;
+		}
 	}
 
 	function updateFlash(elapsed:Float):Void {
