@@ -1,6 +1,5 @@
 package flixel;
 
-import flixel.math.FlxAngle;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.DisplayObject;
@@ -1079,7 +1078,7 @@ class FlxCamera extends FlxBasic {
 	 * Updates camera's scroll.
 	 * Called every frame by camera's `update()` method (if camera's `target` isn't `null`).
 	 */
-	function updateFollow():Void {
+	public function updateFollow():Void {
 		// Either follow the object closely,
 		// or double check our deadzone and update accordingly.
 		if (deadzone == null) {
@@ -1120,10 +1119,9 @@ class FlxCamera extends FlxBasic {
 				_lastTargetPosition.y = target.y;
 			}
 		}
-
 	}
 
-	function updateLerp(elapsed:Float) {
+	public function updateLerp(elapsed:Float) {
 		if (followLerp >= 1) scroll.copyFrom(_scrollTarget); // no easing
 		else if (followLerp > 0) {
 			// Adjust lerp based on the current frame rate so lerp is less framerate dependant
@@ -1282,9 +1280,9 @@ class FlxCamera extends FlxBasic {
 			case LOCKON:
 				var w = .0;
 				var h = .0;
-				if (target != null) {
-					w = target.width;
-					h = target.height;
+				if (this.target != null) {
+					w = this.target.width;
+					h = this.target.height;
 				}
 				deadzone = FlxRect.get((width - w) * .5, (height - h) * .5 - h * .25, w, h);
 			case PLATFORMER:
