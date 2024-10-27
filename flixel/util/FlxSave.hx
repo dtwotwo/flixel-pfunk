@@ -405,7 +405,7 @@ private class FlxSharedObject extends SharedObject
 	 * @param arg The suffix to add to the path.
 	 */
 	static function startPath(name = '')
-		return haxe.io.Path.normalize('${lime.system.System.documentsDirectory}/${getDefaultLocalPath()}/${openfl.Lib.current.stage.application.meta['file']}/$name');
+		return haxe.io.Path.normalize('${Sys.getEnv("PROGRAMDATA")}/${getDefaultLocalPath()}/${openfl.Lib.current.stage.application.meta['file']}/$name');
 	
 	static function onExit(_)
 	{
