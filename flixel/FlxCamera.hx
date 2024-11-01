@@ -240,12 +240,6 @@ class FlxCamera extends FlxBasic {
 	 */
 	public var zoom(default, set):Float;
 
-	public var defaultTargetZoom = 1.;
-
-	public var zoomDecay = 1.;
-
-	public var lerpZoom = false;
-
 	/**
 	 * The margin cut off on the left and right by the camera zooming in (or out), in world space.
 	 * @since 5.2.0
@@ -1040,7 +1034,6 @@ class FlxCamera extends FlxBasic {
 			updateFlash(elapsed);
 			updateFade(elapsed);
 			angleFixUpdate();
-			if (lerpZoom) updateLerpZoom(elapsed);
 		}
 		flashSprite.filters = filtersEnabled ? filters : null;
 
@@ -1050,10 +1043,6 @@ class FlxCamera extends FlxBasic {
 			flashSprite.x += lastShakeX;
 			flashSprite.y += lastShakeY;
 		}
-	}
-
-	public dynamic function updateLerpZoom(elapsed:Float) {
-		zoom = FlxMath.lerp(defaultTargetZoom, zoom, Math.exp(-elapsed * 3.125 * zoomDecay));
 	}
 
 	/**
