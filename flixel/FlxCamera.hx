@@ -240,7 +240,7 @@ class FlxCamera extends FlxBasic {
 	 */
 	public var zoom(default, set):Float;
 
-	public var targetZoom = 1.;
+	public var defaultTargetZoom = 1.;
 
 	public var zoomDecay = 1.;
 
@@ -1053,7 +1053,7 @@ class FlxCamera extends FlxBasic {
 	}
 
 	public dynamic function updateLerpZoom(elapsed:Float) {
-		zoom = FlxMath.lerp(targetZoom, zoom, Math.exp(-elapsed * 3.125 * zoomDecay));
+		zoom = FlxMath.lerp(defaultTargetZoom, zoom, Math.exp(-elapsed * 3.125 * zoomDecay));
 	}
 
 	/**
