@@ -293,7 +293,7 @@ class FlxSound extends FlxBasic
 		if (!playing)
 			return;
 			
-		// _time = _channel.position;
+		_time = _channel.position;
 		
 		var radialMultiplier:Float = 1.0;
 		
@@ -783,7 +783,7 @@ class FlxSound extends FlxBasic
 	
 	inline function get_time():Float
 	{
-		return (playing) ? _channel.position : _time;
+		return _time;
 	}
 	
 	function set_time(time:Float):Float
