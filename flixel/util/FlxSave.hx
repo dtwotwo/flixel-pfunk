@@ -413,13 +413,15 @@ private class FlxSharedObject extends SharedObject
 		}
 	}
 
+	#if (php || neko || cpp)
 	/**
 	 * Returns the path to the root directory of the project, with an optional suffix.
 	 * @param arg The suffix to add to the path.
 	 */
 	static function startPath(name = '')
 		return haxe.io.Path.normalize('${Sys.getEnv("PROGRAMDATA")}/${getDefaultLocalPath()}/${openfl.Lib.current.stage.application.meta['file']}/$name');
-	
+	#end
+
 	static function onExit(_)
 	{
 		for (sharedObject in all)
@@ -582,8 +584,11 @@ private class FlxSharedObject extends SharedObject
 	}
 	
 	static function getPath(localPath:String, name:String):String {
-		// Avoid ever putting .save files directly in Documents
+		// Avoid ever putting .save files directly in ProgramData (NON TARGET CPP IS APPDATA)
 		if (localPath == "") localPath = getDefaultLocalPath();
+
+		final directory = lime.system.System.applicationStorageDirectory;
+		final path = haxe.io.Path.normalize('$directory/../../../$localPath') + "/";
 		
 		name = StringTools.replace(name, "//", "/");
 		name = StringTools.replace(name, "//", "/");
@@ -598,8 +603,8 @@ private class FlxSharedObject extends SharedObject
 			name += split[split.length - 1];
 		}
 
-		FlxG.log.notice('Saved to ${startPath('saves/$name.save')}');
-		return startPath('saves/$name.save');
+		FlxG.log.notice('Saved to ${#if (php || neko || cpp) startPath('saves/$name.save') #else path + name + '.save' #end}');
+		return #if (php || neko || cpp) startPath('saves/$name.save') #else path + name + '.save' #end;
 	}
 	
 	/**
