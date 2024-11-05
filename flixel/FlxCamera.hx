@@ -1,13 +1,5 @@
 package flixel;
 
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
-import openfl.display.DisplayObject;
-import openfl.display.Graphics;
-import openfl.display.Sprite;
-import openfl.geom.ColorTransform;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawBaseItem;
@@ -22,8 +14,16 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
 import openfl.Vector;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 import openfl.display.BlendMode;
+import openfl.display.DisplayObject;
+import openfl.display.Graphics;
+import openfl.display.Sprite;
 import openfl.filters.BitmapFilter;
+import openfl.geom.ColorTransform;
+import openfl.geom.Point;
+import openfl.geom.Rectangle;
 
 using flixel.util.FlxColorTransformUtil;
 
@@ -372,6 +372,11 @@ class FlxCamera extends FlxBasic {
 	 * Pauses fx and camera movement.
 	 */
 	public var paused = false;
+
+	/**
+	 * Fixes borders. Sometimes it needs to disable
+	 */
+	public var angleFix(default, set) = true;
 
 	/**
 	 * Internal, used in blit render mode in camera's `fill()` method for less garbage creation.
@@ -1640,6 +1645,7 @@ class FlxCamera extends FlxBasic {
 	}
 
 	public inline function angleFixUpdate() {
+		if (!angleFix) return;
 		flashSprite.x -= _flashOffset.x;
 		flashSprite.y -= _flashOffset.y;
 		final matrix = new openfl.geom.Matrix();
@@ -1653,6 +1659,12 @@ class FlxCamera extends FlxBasic {
 		flashSprite.x = width * .5 * FlxG.scaleMode.scale.x;
 		flashSprite.y = height * .5 * FlxG.scaleMode.scale.y;
 		flashSprite.rotation = 0;
+	}
+
+	@:noCompletion inline function set_angleFix(newValue:Bool):Bool {
+		angleFix = newValue;
+		angleFixUpdate();
+		return newValue;
 	}
 
 	@:noCompletion inline function set_rotationOffset(newValue:FlxPoint):FlxPoint {
