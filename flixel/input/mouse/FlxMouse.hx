@@ -272,7 +272,7 @@ class FlxMouse extends FlxPointer implements IFlxInputManager {
 		} else if ((graphic is BitmapData)) {
 			cursor = new Bitmap(cast graphic);
 		} else if ((graphic is String)) {
-			cursor = new Bitmap(FlxAssets.getBitmapData(graphic));
+			cursor = new Bitmap(FlxG.assets.getBitmapData(graphic, false));
 		} else cursor = new Bitmap(new GraphicCursor(0, 0));
 
 		cursor.x = xOffset;

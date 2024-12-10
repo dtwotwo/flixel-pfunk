@@ -374,9 +374,9 @@ class FlxCamera extends FlxBasic {
 	public var paused = false;
 
 	/**
-	 * Fixes borders. Sometimes it needs to disable
+	 * Fix borders when camera angles
 	 */
-	public var angleFix(default, set) = true;
+	public var angleFix(default, set) = false;
 
 	/**
 	 * Internal, used in blit render mode in camera's `fill()` method for less garbage creation.
@@ -921,18 +921,21 @@ class FlxCamera extends FlxBasic {
 	/**
 	 * Instantiates a new camera at the specified location, with the specified size and zoom level.
 	 *
-	 * @param   x       X location of the camera's display in pixels. Uses native, 1:1 resolution, ignores zoom.
-	 * @param   y       Y location of the camera's display in pixels. Uses native, 1:1 resolution, ignores zoom.
-	 * @param   width   The width of the camera display in pixels.
-	 * @param   height  The height of the camera display in pixels.
-	 * @param   zoom    The initial zoom level of the camera.
-	 *                  A zoom level of 2 will make all pixels display at 2x resolution.
+	 * @param   x      		X location of the camera's display in pixels. Uses native, 1:1 resolution, ignores zoom.
+	 * @param   y       	Y location of the camera's display in pixels. Uses native, 1:1 resolution, ignores zoom.
+	 * @param   width   	The width of the camera display in pixels.
+	 * @param   height  	The height of the camera display in pixels.
+	 * @param   zoom    	The initial zoom level of the camera.
+	 *                  	A zoom level of 2 will make all pixels display at 2x resolution.
+	 * @param 	angleFix 	Fixes borders of camera when its angles. May cause problems with objects in camera
 	 */
-	public function new(x = .0, y = .0, width = 0, height = 0, zoom = .0) {
+	public function new(x = .0, y = .0, width = 0, height = 0, zoom = .0, ?angleFix = false) {
 		super();
 
 		this.x = x;
 		this.y = y;
+
+		this.angleFix = angleFix;
 
 		if (zoom == 0) zoom = defaultZoom;
 		

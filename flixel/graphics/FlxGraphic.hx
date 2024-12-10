@@ -40,7 +40,7 @@ class FlxGraphic implements IFlxDestroyable
 
 		if (!Cache)
 		{
-			bitmap = FlxAssets.getBitmapData(Source);
+			bitmap = FlxG.assets.getBitmapData(Source);
 			if (bitmap == null)
 				return null;
 			return createGraphic(bitmap, Key, Unique, Cache);
@@ -51,7 +51,7 @@ class FlxGraphic implements IFlxDestroyable
 		if (graphic != null)
 			return graphic;
 
-		bitmap = FlxAssets.getBitmapData(Source);
+		bitmap = FlxG.assets.getBitmapData(Source);
 		if (bitmap == null)
 			return null;
 
@@ -564,7 +564,7 @@ class FlxGraphic implements IFlxDestroyable
 		if (assetsClass != null)
 			newBitmap = FlxAssets.getBitmapFromClass(assetsClass);
 		else if (assetsKey != null)
-			newBitmap = FlxAssets.getBitmapData(assetsKey);
+			newBitmap = FlxG.assets.getBitmapData(assetsKey);
 
 		if (newBitmap != null)
 			return FlxGraphic.getBitmap(newBitmap, unique);
@@ -637,7 +637,7 @@ class FlxGraphic implements IFlxDestroyable
 
 			#if FLX_OPENGL_AVAILABLE
 			final max = FlxG.bitmap.maxTextureSize;
-			if (max != -1) {
+			if (max > 0) {
 				if (width > max || height > max)
 					FlxG.log.warn('Graphic dimensions (${width}x${height}) exceed the maximum allowed size (${max}x${max}), which may cause rendering issues.');
 			}

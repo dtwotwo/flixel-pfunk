@@ -1,5 +1,7 @@
 package flixel.system.debug.log;
 
+import flixel.util.FlxSignal;
+
 using flixel.util.FlxStringUtil;
 
 /**
@@ -42,9 +44,10 @@ class LogStyle
 	public var callbackFunction:()->Void;
 	
 	/**
-	 * A callback function that is called when this LogStyle is used
+	 * **Note:** Unlike the deprecated `callbackFunction`, this is called every time,
+	 * even when logged with `once = true` and even in release mode.
 	 */
-	public var callback:(data:Any)->Void;
+	public final onLog = new FlxTypedSignal<(data:Any) -> Void>();
 
 	/**
 	 * Whether an exception is thrown when this LogStyle is used.
@@ -68,7 +71,7 @@ class LogStyle
 	 * @param   callback          A callback function that is called when this LogStyle is used
 	 * @param   throwError        Whether an error is thrown when this LogStyle is used
 	 */
-	 @:haxe.warning("-WDeprecated")
+	@:haxe.warning("-WDeprecated")
 	public function new(prefix = "", color = "FFFFFF", size = 12, bold = false, italic = false, underlined = false,
 			?errorSound:String, openConsole = false, ?callbackFunction:()->Void, ?callback:(Any)->Void, throwException = false)
 	{
@@ -81,7 +84,7 @@ class LogStyle
 		this.errorSound = errorSound;
 		this.openConsole = openConsole;
 		this.callbackFunction = callbackFunction;
-		this.callback = callback;
+		if (callback != null) onLog.add(callback);
 		this.throwException = throwException;
 	}
 	

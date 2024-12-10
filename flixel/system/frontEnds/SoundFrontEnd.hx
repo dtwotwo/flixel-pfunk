@@ -11,11 +11,7 @@ import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSoundTray;
 import flixel.text.FlxInputText;
 import flixel.util.FlxSignal;
-import openfl.Assets;
 import openfl.media.Sound;
-#if (openfl >= "8.0.0")
-import openfl.utils.AssetType;
-#end
 
 /**
  * Accessed via `FlxG.sound`.
@@ -184,7 +180,7 @@ import openfl.utils.AssetType;
 	 */
 	public inline function cache(embeddedSound:String):Sound {
 		// load the sound into the OpenFL assets cache
-		if (Assets.exists(embeddedSound, AssetType.SOUND) || Assets.exists(embeddedSound, AssetType.MUSIC)) return Assets.getSound(embeddedSound, true);
+		if (FlxG.assets.exists(embeddedSound, SOUND)) return FlxG.assets.getSoundUnsafe(embeddedSound, true);
 		FlxG.log.error('Could not find a Sound asset with an ID of \'$embeddedSound\'.');
 		return null;
 	}
@@ -194,7 +190,7 @@ import openfl.utils.AssetType;
 	 * WARNING: can lead to high memory usage.
 	 */
 	public function cacheAll():Void {
-		for (id in Assets.list(AssetType.SOUND)) cache(id);
+		for (id in FlxG.assets.list(SOUND)) cache(id);
 	}
 
 	/**
@@ -277,35 +273,8 @@ import openfl.utils.AssetType;
 	 */
 	public function changeVolume(Amount:Float):Void {
 		muted = false;
-		volume = logToLinear(volume);
 		volume += Amount;
-		volume = linearToLog(volume);
 		showSoundTray(Amount > 0);
-	}
-
-	/**
-	 * Converts a linear value to a logarithmic value.
-	 * 
-	 * This function is useful for converting linear slider values to logarithmic scales.
-	 * 
-	 * @param x The linear value to convert.
-	 * @param minValue The minimum value of the logarithmic scale. Defaults to 0.001.
-	 * @return The logarithmic value.
-	 */
-	public function linearToLog(x:Float, minValue = .001):Float {
-		x = Math.max(0, Math.min(1, x));
-		return Math.exp(Math.log(minValue) * (1 - x));
-	}
-
-	/**
-	 * Converts a value from logarithmic scale to linear scale.
-	 * @param x The value to convert.
-	 * @param minValue The minimum value of the logarithmic scale. Defaults to 0.001.
-	 * @return The converted value.
-	 */
-	public function logToLinear(x:Float, minValue = .001):Float {
-		x = Math.max(minValue, Math.min(1, x));
-		return 1 - (Math.log(x) / Math.log(minValue));
 	}
 
 	/**
