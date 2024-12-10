@@ -929,7 +929,7 @@ class FlxCamera extends FlxBasic {
 	 *                  	A zoom level of 2 will make all pixels display at 2x resolution.
 	 * @param 	angleFix 	Fixes borders of camera when its angles. May cause problems with objects in camera
 	 */
-	public function new(x = .0, y = .0, width = 0, height = 0, zoom = .0, ?angleFix = false) {
+	public function new(?x = .0, ?y = .0, ?width = 0, ?height = 0, ?zoom = .0, ?angleFix = false) {
 		super();
 
 		this.x = x;
