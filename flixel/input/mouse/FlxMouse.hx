@@ -61,6 +61,12 @@ class FlxMouse extends FlxPointer implements IFlxInputManager {
 	 * Used to toggle the visiblity of the mouse cursor - works on both
 	 * the flixel and the system cursor, depending on which one is active.
 	 */
+	public var adjustSize = false;
+
+	/**
+	 * Used to toggle the visiblity of the mouse cursor - works on both
+	 * the flixel and the system cursor, depending on which one is active.
+	 */
 	public var visible(default, set) = #if (mobile || switch) false #else true #end;
 
 	/**
@@ -459,10 +465,15 @@ class FlxMouse extends FlxPointer implements IFlxInputManager {
 		Mouse.hide();
 
 		FlxG.signals.gameResized.add((w, h) -> {
-			widthScreen = Application.current.window.display.bounds.width / Application.current.window.width;
-			heightScreen = Application.current.window.display.bounds.height / Application.current.window.height;
-			cursorContainer.scaleX = cursor.scaleX / widthScreen;
-			cursorContainer.scaleY = cursor.scaleY / heightScreen;
+			if (adjustSize) {
+				widthScreen = Application.current.window.display.bounds.width / Application.current.window.width;
+				heightScreen = Application.current.window.display.bounds.height / Application.current.window.height;
+				cursorContainer.scaleX = cursor.scaleX / widthScreen;
+				cursorContainer.scaleY = cursor.scaleY / heightScreen;
+			} else {
+				cursorContainer.scaleX = cursor.scaleX;
+				cursorContainer.scaleY = cursor.scaleY;
+			}
 		});
 	}
 
@@ -486,14 +497,19 @@ class FlxMouse extends FlxPointer implements IFlxInputManager {
 			cursorContainer.x = FlxG.game.mouseX;
 			cursorContainer.y = FlxG.game.mouseY;
 			
-			if (FlxG.fullscreen) {
+			if (adjustSize) {
+				if (FlxG.fullscreen) {
+					cursorContainer.scaleX = cursor.scaleX;
+					cursorContainer.scaleY = cursor.scaleY;
+				} else {
+					if (widthScreen == heightScreen) {
+						cursorContainer.scaleX = cursor.scaleX / widthScreen;
+						cursorContainer.scaleY = cursor.scaleY / heightScreen;
+					}
+				}
+			} else {
 				cursorContainer.scaleX = cursor.scaleX;
 				cursorContainer.scaleY = cursor.scaleY;
-			} else {
-				if (widthScreen == heightScreen) {
-					cursorContainer.scaleX = cursor.scaleX / widthScreen;
-					cursorContainer.scaleY = cursor.scaleY / heightScreen;
-				}
 			}
 		}
 		#end
